@@ -9,3 +9,15 @@ TDD 위주의 강의라는 리뷰를 보고 TDD를 학습하기 위해 해당 �
 - **Must Not**
     - `@EqualsAndHashCode` 의 of 에 사용할 필드를 주의 할 것(상호참조로 인한 Stack overflow 발생할 수 있다.)
     - Entity에 `@Data` 어노테이션을 사용하지 말것! (위와 동일한 사유)
+- 생성자가 하나만 있고, 생성자로 받아올 파라미터가 이미 Bean으로 등록되어 있으면 @Autowired 어노테이션을 생략해도된다(Spring Ver. >= 4.3)
+    - ex) 
+    ```java
+    public class EventController{
+  
+      private final EventRepository eventRepository;
+  
+      public EventController(EventRepository eventRepository){
+          this.eventRepository = eventRepository;
+      }
+    }
+    ```
