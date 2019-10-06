@@ -3,6 +3,7 @@ package dev.hodory.restapi.events;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 import java.net.URI;
+import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,15 +16,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class EventController {
 
   private final EventRepository eventRepository;
+  private final ModelMapper modelMapper;
 
-  public EventController(EventRepository eventRepository) {
+  public EventController(EventRepository eventRepository, ModelMapper modelMapper) {
     this.eventRepository = eventRepository;
+    this.modelMapper = modelMapper;
   }
 
   @PostMapping
-  public ResponseEntity createEvent(@RequestBody final Event event) {
-    eventRepository.save(event);
-    final URI createdUri = linkTo(EventController.class).slash(event.getId()).toUri();
+  public ResponseEntity createEvent(@RequestBody final EventDto eventDto) {
+    Event event = modelMapper.map(eventDto, Event.class);
+    Event newEvent = this.eventRepository.save(event);
+    final URI createdUri = linkTo(EventController.class).slash(newEvent.getId()).toUri();
     return ResponseEntity.created(createdUri).body(event);
   }
 }
