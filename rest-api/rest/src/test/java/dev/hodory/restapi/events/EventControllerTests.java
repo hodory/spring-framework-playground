@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.hodory.restapi.common.TestDescription;
 import java.time.LocalDateTime;
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -32,6 +33,7 @@ public class EventControllerTests {
   ObjectMapper objectMapper;
 
   @Test
+  @TestDescription("정상적인 이벤트를 등록하는 테스트")
   public void createEvent() throws Exception {
     final EventDto event = EventDto.builder().name("Spring Framework")
         .description("REST API Development With Spring Framework")
@@ -60,6 +62,7 @@ public class EventControllerTests {
   }
 
   @Test
+  @TestDescription("입력 받을 수 없는 값을 사용하여 에러가 발생하는 테스트")
   public void createEventBadRequest() throws Exception {
     final Event event = Event.builder()
         .id(100)
@@ -87,6 +90,7 @@ public class EventControllerTests {
   }
 
   @Test
+  @TestDescription("입력 값이 비어 있는 경우 에러가 발생하는 테스트")
   public void createEventBadRequestEmptyInput() throws Exception {
     final EventDto eventDto = EventDto.builder().build();
 
@@ -97,6 +101,7 @@ public class EventControllerTests {
   }
 
   @Test
+  @TestDescription("입력값이 잘못된 경우에 에러가 발생하는 테스트")
   public void createEventBadRequestWrongInput() throws Exception {
     final EventDto eventDto = EventDto.builder()
         .name("Spring")
