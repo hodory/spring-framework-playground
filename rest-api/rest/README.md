@@ -27,4 +27,13 @@ TDD 위주의 강의라는 리뷰를 보고 TDD를 학습하기 위해 해당 �
 - Mocking 해야할게 많을때는 `@SpringBootTest` 어노테이션을 사용해서 테스트에 필요한 모든 Bean들이 등록되도록 하는게
 더 간편하게 테스트 할 수 있음. -> Application의 `@SpringBootApplcation` 어노테이션을 찾아서 모든 Bean이 등록 되도록 해주는 기능.
 
-Deserialization -> Json 문자열을 Object로 변환하는 과정 
+Deserialization -> Json 문자열을 Object로 변환하는 과정
+
+
+### Errors 객체를 Body에 담을 수 없는 이유
+
+---
+도메인 객체는 자바 빈(Bean) 스펙을 준수 하기 때문에 BeanSerializer를 이용해 Serialization을 할 수 있어 JSON으로 변환 할 수 있지만,<br/>
+Errors 객체는 자바 빈 스펙을 준수하고 있는 객체가 아니라서 BeanSerializer를 이용해 JSON으로 변환 할 수 없다.
+
+ObjectMapper에 등록을 하기 위해 스프링 부트가 제공하는`@JsonComponent` 어노테이션을 사용하면 등록이 완료된다.
