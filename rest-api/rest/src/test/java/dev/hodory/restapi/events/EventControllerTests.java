@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.hodory.restapi.common.TestDescription;
 import java.time.LocalDateTime;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +57,10 @@ public class EventControllerTests {
         .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
         .andExpect(jsonPath("free").value(false))
         .andExpect(jsonPath("offline").value(true))
-        .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()));
+        .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
+        .andExpect(jsonPath("_links.self").exists())
+        .andExpect(jsonPath("_links.query-events").exists())
+        .andExpect(jsonPath("_links.update-event").exists());
   }
 
   @Test

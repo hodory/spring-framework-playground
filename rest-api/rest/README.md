@@ -37,3 +37,7 @@ Deserialization -> Json 문자열을 Object로 변환하는 과정
 Errors 객체는 자바 빈 스펙을 준수하고 있는 객체가 아니라서 BeanSerializer를 이용해 JSON으로 변환 할 수 없다.
 
 ObjectMapper에 등록을 하기 위해 스프링 부트가 제공하는`@JsonComponent` 어노테이션을 사용하면 등록이 완료된다.
+
+### Spring HATEOAS를 바로 사용 가능한 이유
+`@EnableHypermediaSupport`와 같은 어노테이션을 붙여야지만 Spring HATEOAS 기능을 사용할 수 있는데<br/>
+Spring Boot에서 자동 설정을 해주고 있기 때문이다.
