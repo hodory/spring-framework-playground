@@ -41,3 +41,50 @@ ObjectMapper에 등록을 하기 위해 스프링 부트가 제공하는`@JsonCo
 ### Spring HATEOAS를 바로 사용 가능한 이유
 `@EnableHypermediaSupport`와 같은 어노테이션을 붙여야지만 Spring HATEOAS 기능을 사용할 수 있는데<br/>
 Spring Boot에서 자동 설정을 해주고 있기 때문이다.
+
+### REST DOCS 설정 방법
+
+---
+문서상에서는 mockMvc를 사용할 때
+```java
+private MockMvc mockMvc;
+
+@Autowired
+private WebApplicationContext context;
+
+@Before
+public void setUp() {
+	this.mockMvc = MockMvcBuilders.webAppContextSetup(this.context)
+			.apply(documentationConfiguration(this.restDocumentation)) 
+			.build();
+}
+```
+이와 같이 설정 해야 하지만, 스프링 부트를 사용할 때에는 자동으로 설정이 되어 있다.
+
+
+### Spring RestDocs SnippetException
+
+---
+```
+org.springframework.restdocs.snippet.SnippetException: The following parts of the payload were not documented:
+{
+  "_links" : {
+    "self" : {
+      "href" : "http://localhost:8080/api/events/1"
+    },
+    "query-events" : {
+      "href" : "http://localhost:8080/api/events"
+    },
+    "update-event" : {
+      "href" : "http://localhost:8080/api/events/1"
+    }
+  }
+}
+```
+이와 같은 에러가 나는 이유는 본문에 `_links` 정보가 들어 있기 때문에,
+`responseFields()`를 호출할때 응답 필드들을 검증을 하는데, `_links`가 누락 되어서  이와 같은 오류가 발생한다.
+
+이때에는 해결방안중 하나로 `relaxedResponseFields()`를 사용하여 응답의 일부분만 검증 할 수 있다.
+
+하지만 이렇게 처리 할 경우 일부분만 테스트하기때문에 정확한 문서를 만들지 못할 수 있는 단점이 있으므로,<br/>
+`_links` 를 `responseFields()`에 넣어 처리하도록한다.
