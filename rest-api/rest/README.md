@@ -99,3 +99,12 @@ org.springframework.restdocs.snippet.SnippetException: The following parts of th
 메인 컴파일 -> 테스트쪽으로 resources를 복사 -> 테스트 컴파일 -> 테스트 resources를 복사
 중복 설정이 많아지기때문에 덮어쓸 값들만 파일명을 변경하여 `test\resources`디렉토리에 설정하면된다.
 이때 `@ActiveProfiles` 어노테이션을 사용해서 테스트 코드에 어떠한 값을 사용할지 명시해주어야한다. `ex) @ActiveProfiles("test")` 
+
+### JSON Array는 Unwrap 되지 않는다.
+
+--- 
+
+`@JsonUnwrap` 어노테이션의 주석을 확인하면
+> Value is serialized as JSON Object (can not unwrap JSON arrays using this mechanism)
+
+이와 같이 되어있다. 

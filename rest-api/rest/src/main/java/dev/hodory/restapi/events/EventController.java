@@ -2,6 +2,7 @@ package dev.hodory.restapi.events;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
+import dev.hodory.restapi.common.ErrorsResource;
 import java.net.URI;
 import javax.validation.Valid;
 import org.modelmapper.ModelMapper;
@@ -34,12 +35,12 @@ public class EventController {
   public ResponseEntity createEvent(@RequestBody @Valid final EventDto eventDto,
       final Errors errors) {
     if (errors.hasErrors()) {
-      return ResponseEntity.badRequest().body(errors);
+      return badRequest(errors);
     }
 
     eventValidator.validate(eventDto, errors);
     if (errors.hasErrors()) {
-      return ResponseEntity.badRequest().body(errors);
+      return badRequest(errors);
     }
 
     final Event event = modelMapper.map(eventDto, Event.class);
@@ -53,5 +54,9 @@ public class EventController {
     eventResource.add(selfLinkBuilder.withRel("update-event"));
     eventResource.add(new Link("/docs/index.html#resource-events-create").withRel("profile"));
     return ResponseEntity.created(createdUri).body(eventResource);
+  }
+
+  private ResponseEntity badRequest(Errors errors) {
+    return ResponseEntity.badRequest().body(new ErrorsResource(errors));
   }
 }
