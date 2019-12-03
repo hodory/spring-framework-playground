@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,6 +39,7 @@ public class Event {
   private boolean offline;
   private boolean free;
   @Enumerated(EnumType.STRING)
+  @Default
   private EventStatus eventStatus = EventStatus.DRAFT;
 
   public void update() {
