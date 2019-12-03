@@ -88,3 +88,14 @@ org.springframework.restdocs.snippet.SnippetException: The following parts of th
 
 하지만 이렇게 처리 할 경우 일부분만 테스트하기때문에 정확한 문서를 만들지 못할 수 있는 단점이 있으므로,<br/>
 `_links` 를 `responseFields()`에 넣어 처리하도록한다.
+
+
+### TEST 환경과 DB 분리
+
+---
+
+`application.yml` 또는 `application.properties`를 `test\resources` 디렉토리에 동일하게 두면 파일명이 같기 때문에<br/>
+빌드시에 `main\resources`로 덮어쓰기가 된다.
+메인 컴파일 -> 테스트쪽으로 resources를 복사 -> 테스트 컴파일 -> 테스트 resources를 복사
+중복 설정이 많아지기때문에 덮어쓸 값들만 파일명을 변경하여 `test\resources`디렉토리에 설정하면된다.
+이때 `@ActiveProfiles` 어노테이션을 사용해서 테스트 코드에 어떠한 값을 사용할지 명시해주어야한다. `ex) @ActiveProfiles("test")` 
