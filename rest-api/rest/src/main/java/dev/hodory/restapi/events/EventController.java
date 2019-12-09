@@ -6,11 +6,15 @@ import dev.hodory.restapi.common.ErrorsResource;
 import java.net.URI;
 import javax.validation.Valid;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,8 +56,17 @@ public class EventController {
     final EventResource eventResource = new EventResource(event);
     eventResource.add(linkTo(EventController.class).withRel("query-events"));
     eventResource.add(selfLinkBuilder.withRel("update-event"));
-    eventResource.add(new Link("/docs/index.html#resource-events-create").withRel("profile"));
+    eventResource.add(new Link("/docs/index.html#resources-events-create").withRel("profile"));
     return ResponseEntity.created(createdUri).body(eventResource);
+  }
+
+  @GetMapping
+  public ResponseEntity queryEvents(Pageable pageable,
+      PagedResourcesAssembler<Event> assembler) {
+    final Page<Event> page = this.eventRepository.findAll(pageable);
+    final var pagedResources = assembler.toResource(page, e -> new EventResource(e));
+    pagedResources.add(new Link("/docs/index.html#resources-event-list").withRel("profile"));
+    return ResponseEntity.ok().body(pagedResources);
   }
 
   private ResponseEntity badRequest(Errors errors) {

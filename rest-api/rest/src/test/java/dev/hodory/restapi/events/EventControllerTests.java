@@ -10,6 +10,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.hodory.restapi.common.RestDocsConfiguration;
 import dev.hodory.restapi.common.TestDescription;
 import java.time.LocalDateTime;
+import java.util.stream.IntStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,9 @@ public class EventControllerTests {
 
   @Autowired
   ObjectMapper objectMapper;
+
+  @Autowired
+  EventRepository eventRepository;
 
   @Test
   @TestDescription("정상적인 이벤트를 등록하는 테스트")
@@ -197,5 +202,102 @@ public class EventControllerTests {
         .andExpect(jsonPath("content[0].defaultMessage").exists())
         .andExpect(jsonPath("content[0].code").exists())
         .andExpect(jsonPath("_links.index").exists());
+  }
+
+
+  @Test
+  @TestDescription("30개의 이벤트를 10개씩 두번째 페이지 조회하기")
+  public void queryEvents() throws Exception {
+    // Given
+    IntStream.range(0, 30).forEach(this::generateEvent);
+
+    // When
+    this.mockMvc.perform(get("/api/events")
+        .param("page", "1")
+        .param("size", "10")
+        .param("sort", "name,DESC"))
+        .andDo(print())
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("page").exists())
+        .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
+        .andExpect(jsonPath("_links.self").exists())
+        .andExpect(jsonPath("_links.profile").exists())
+        .andDo(
+            document("query-events",
+                links(
+                    linkWithRel("self").description("link to self"),
+                    linkWithRel("profile").description("link to profile"),
+                    linkWithRel("first").description("link to first event list"),
+                    linkWithRel("prev")
+                        .description("link to prev event list"),
+                    linkWithRel("self")
+                        .description("link to self"),
+                    linkWithRel("next")
+                        .description("link to next event list"),
+                    linkWithRel("last")
+                        .description("link to last event list"),
+                    linkWithRel("profile")
+                        .description("link to profile")
+                ),
+                responseFields(
+                    fieldWithPath("_embedded.eventList[0].id")
+                        .description("identifier of new event"),
+                    fieldWithPath("_embedded.eventList[0].name").description("Name of new event"),
+                    fieldWithPath("_embedded.eventList[0].description")
+                        .description("Description of new event"),
+                    fieldWithPath("_embedded.eventList[0].beginEnrollmentDateTime")
+                        .description("date time of begin of new event"),
+                    fieldWithPath("_embedded.eventList[0].closeEnrollmentDateTime")
+                        .description("date time of close of new event"),
+                    fieldWithPath("_embedded.eventList[0].beginEventDateTime")
+                        .description("date time of begin of new event"),
+                    fieldWithPath("_embedded.eventList[0].endEventDateTime")
+                        .description("date time of end of new event"),
+                    fieldWithPath("_embedded.eventList[0].location")
+                        .description("location of new event"),
+                    fieldWithPath("_embedded.eventList[0].basePrice")
+                        .description("base price of new event"),
+                    fieldWithPath("_embedded.eventList[0].maxPrice")
+                        .description("max price of new event"),
+                    fieldWithPath("_embedded.eventList[0].limitOfEnrollment")
+                        .description("limit of enrollment of new event"),
+                    fieldWithPath("_embedded.eventList[0].free")
+                        .description("it tells if this event is free or not"),
+                    fieldWithPath("_embedded.eventList[0].offline")
+                        .description("it tells if this event is offline event or not"),
+                    fieldWithPath("_embedded.eventList[0].eventStatus")
+                        .description("event Status"),
+                    fieldWithPath("_embedded.eventList[0]._links.self.href")
+                        .description("link to self"),
+                    fieldWithPath("_links.first.href").description("link to first event list"),
+                    fieldWithPath("_links.prev.href")
+                        .description("link to prev event list"),
+                    fieldWithPath("_links.self.href")
+                        .description("link to self"),
+                    fieldWithPath("_links.next.href")
+                        .description("link to next event list"),
+                    fieldWithPath("_links.last.href")
+                        .description("link to last event list"),
+                    fieldWithPath("_links.profile.href")
+                        .description("link to profile"),
+                    fieldWithPath("page.size")
+                        .description("List perPage Count"),
+                    fieldWithPath("page.totalElements")
+                        .description("Event Total Count"),
+                    fieldWithPath("page.totalPages")
+                        .description("Event List Total Page"),
+                    fieldWithPath("page.number")
+                        .description("Current Page Number")
+                )
+            )
+        );
+  }
+
+  private void generateEvent(int index) {
+    final Event event = Event.builder()
+        .name("event" + index)
+        .description("Test Event")
+        .build();
+    this.eventRepository.save(event);
   }
 }
