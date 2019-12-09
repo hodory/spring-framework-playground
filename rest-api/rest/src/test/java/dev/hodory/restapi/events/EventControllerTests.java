@@ -7,6 +7,7 @@ import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.li
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -23,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.stream.IntStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -51,6 +53,9 @@ public class EventControllerTests {
 
   @Autowired
   EventRepository eventRepository;
+
+  @Autowired
+  ModelMapper modelMapper;
 
   @Test
   @TestDescription("정상적인 이벤트를 등록하는 테스트")
@@ -319,10 +324,100 @@ public class EventControllerTests {
         .andExpect(status().isNotFound());
   }
 
+  @Test
+  @TestDescription("정상적으로 이벤트를 수정하는 테스트")
+  public void updateEvent() throws Exception {
+    // Given
+    final Event event = this.generateEvent(10);
+    final String eventName = "Spring Test Framework";
+    final EventDto newEvent = modelMapper.map(event, EventDto.class);
+    newEvent.setName(eventName);
+
+    // When & Then
+    this.mockMvc.perform(
+        put("/api/events/{id}", event.getId())
+            .contentType(MediaType.APPLICATION_JSON_UTF8)
+            .content(objectMapper.writeValueAsString(newEvent))
+            .accept(MediaTypes.HAL_JSON)
+    ).andDo(print())
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("id").exists())
+        .andExpect(jsonPath("name").value(eventName))
+        .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("free").value(false))
+        .andExpect(jsonPath("offline").value(true))
+        .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
+        .andDo(document("update-an-event"));
+  }
+
+  @Test
+  @TestDescription("입력이 비어있는 경우 이벤트 수정 실패")
+  public void updateEvent400_Empty() throws Exception {
+    // Given
+    final Event event = this.generateEvent(10);
+    final EventDto eventDto = new EventDto();
+
+    // When & Then
+    this.mockMvc.perform(
+        put("/api/events/{id}", event.getId())
+            .contentType(MediaType.APPLICATION_JSON_UTF8)
+            .content(objectMapper.writeValueAsString(eventDto))
+            .accept(MediaTypes.HAL_JSON)
+    ).andDo(print())
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @TestDescription("입력이 잘못된 경우 이벤트 수정 실패")
+  public void updateEvent400_WrongRequest() throws Exception {
+    // Given
+    final Event event = this.generateEvent(10);
+    final EventDto eventDto = this.modelMapper.map(event, EventDto.class);
+    eventDto.setBasePrice(20000);
+    eventDto.setMaxPrice(10000);
+
+    // When & Then
+    this.mockMvc.perform(
+        put("/api/events/{id}", event.getId())
+            .contentType(MediaType.APPLICATION_JSON_UTF8)
+            .content(objectMapper.writeValueAsString(eventDto))
+            .accept(MediaTypes.HAL_JSON)
+    ).andDo(print())
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @TestDescription("존재하지 않는 이벤트 수정 실패")
+  public void updateEvent404() throws Exception {
+    // Given
+    final Event event = this.generateEvent(440);
+    final EventDto eventDto = this.modelMapper.map(event, EventDto.class);
+
+    // When & Then
+    this.mockMvc.perform(
+        put("/api/events/1231231")
+            .contentType(MediaType.APPLICATION_JSON_UTF8)
+            .content(objectMapper.writeValueAsString(eventDto))
+            .accept(MediaTypes.HAL_JSON)
+    ).andDo(print())
+        .andExpect(status().isNotFound());
+  }
+
   private Event generateEvent(int index) {
     final Event event = Event.builder()
-        .name("event" + index)
-        .description("Test Event")
+        .name("event " + index)
+        .description("test event")
+        .beginEnrollmentDateTime(LocalDateTime.of(2019, 9, 22, 0, 0))
+        .closeEnrollmentDateTime(LocalDateTime.of(2019, 9, 23, 23, 59))
+        .beginEventDateTime(LocalDateTime.of(2019, 9, 25, 22, 59))
+        .endEventDateTime(LocalDateTime.of(2019, 9, 25, 23, 59))
+        .basePrice(100)
+        .maxPrice(200)
+        .limitOfEnrollment(100)
+        .location("강남")
+        .free(false)
+        .offline(true)
+        .eventStatus(EventStatus.DRAFT)
         .build();
     return this.eventRepository.save(event);
   }
