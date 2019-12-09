@@ -4,6 +4,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 import dev.hodory.restapi.common.ErrorsResource;
 import java.net.URI;
+import java.util.Optional;
 import javax.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,6 +69,19 @@ public class EventController {
     final var pagedResources = assembler.toResource(page, e -> new EventResource(e));
     pagedResources.add(new Link("/docs/index.html#resources-event-list").withRel("profile"));
     return ResponseEntity.ok().body(pagedResources);
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity getEvent(@PathVariable Integer id) {
+    final Optional<Event> optionalEvent = this.eventRepository.findById(id);
+    if (optionalEvent.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    final Event event = optionalEvent.get();
+    final EventResource eventResource = new EventResource(event);
+    eventResource.add(new Link("/docs/index.html#resources-events-get").withRel("profile"));
+    return ResponseEntity.ok(eventResource);
   }
 
   private ResponseEntity badRequest(Errors errors) {
