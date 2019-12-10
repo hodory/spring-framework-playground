@@ -108,3 +108,10 @@ org.springframework.restdocs.snippet.SnippetException: The following parts of th
 > Value is serialized as JSON Object (can not unwrap JSON arrays using this mechanism)
 
 이와 같이 되어있다. 
+
+### ENUM Type
+
+---
+
+roles와 같은 필드는 ElementCollection을 이용해서 여러가지를 가질 수 있도록 해야한다<br/>
+Set이나 List는 fetch 타입이 `Lazy fetch` 이다.
