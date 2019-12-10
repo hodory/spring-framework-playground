@@ -1,13 +1,13 @@
 package dev.hodory.restapi.events;
 
-import dev.hodory.restapi.accounts.Account;
+//import dev.hodory.restapi.accounts.Account;
+
 import java.time.LocalDateTime;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -43,8 +43,8 @@ public class Event {
   @Enumerated(EnumType.STRING)
   @Default
   private EventStatus eventStatus = EventStatus.DRAFT;
-  @ManyToOne
-  private Account manager; // 이벤트에서만 manager를 참조할 수 있도록
+//  @ManyToOne
+//  private Account manager; // 이벤트에서만 manager를 참조할 수 있도록
 
   public void update() {
     this.free = this.basePrice == 0 && this.maxPrice == 0;

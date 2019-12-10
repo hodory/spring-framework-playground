@@ -115,3 +115,31 @@ org.springframework.restdocs.snippet.SnippetException: The following parts of th
 
 roles와 같은 필드는 ElementCollection을 이용해서 여러가지를 가질 수 있도록 해야한다<br/>
 Set이나 List는 fetch 타입이 `Lazy fetch` 이다.
+
+### WebSecurity & Method Security
+
+Method Security는 웹과 상관없이 메소드가 호출되었을때 인증 또는 권한을 확인해주는 시큐리티이다.
+두개 모두 공통된 SecuriyInterceptor를 사용한다.
+
+Web Security는 Servlet과 연관이 되어있다.(Filter 기반 Security)
+
+요청이 들어오면 `Servlet Filter`가 가로채서 스프링 Filter Security Interceptor 쪽으로 요청을 보내고,<br/>
+인증이 필요한지 확인 후 필터가 필요하다면 `Security Interceptor`에 들어오게된다.
+
+#### 인증(Authentication)
+그 후, `Security Context Holder(Thread Local)`에 인증 정보가 없을 경우, `AuthenticationManager`를 이용하여 로그인을 한다.<br/>
+로그인이 성공하면, `Security Context Holder`에 인증 정보를 저장한다.
+
+#### 인가(Authorization)
+인증 정보를 가지고 `AccessDecisionManager`를 이용해 적절한 권한을 가지고 있는지 확인한다.(주로 유저의 `role`을 확인한다.)
+
+### AuthenticationManager
+
+---
+
+#### 주요 사용하는 메소드
+- UserDetailsService
+- PasswordEncoder : 유저가 입력한 패스워드가 맞는지 검사
+  
+#### Basic Authentication
+`Authentication: Basic {userId + Password가 인코딩된 문자열}` 을 헤더로 입력 받음.
