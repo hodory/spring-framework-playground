@@ -3,7 +3,6 @@ package dev.hodory.restapi.accounts;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,7 +21,7 @@ public class AccountService implements UserDetailsService {
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     Account account = this.accountRepository.findByEmail(username).orElseThrow(()
-        -> new EntityNotFoundException(username));
+        -> new UsernameNotFoundException(username));
 
     return new User(account.getEmail(), account.getPassword(), authorities(account.getRoles()));
   }
