@@ -143,3 +143,10 @@ Web Security는 Servlet과 연관이 되어있다.(Filter 기반 Security)
   
 #### Basic Authentication
 `Authentication: Basic {userId + Password가 인코딩된 문자열}` 을 헤더로 입력 받음.
+
+### WebSecurity & HttpSecurity
+
+---
+
+스프링 시큐리티는 적용하되, HttpSecurity로 필터링 하기 위해, HttpSecurity를 사용할 수 있다.<br/>
+더 많은 체이닝 처리를 해야해서 서버가 더 많이 일을 해야하므로, static 리소스의 경우 WebSecurity에서 접근 관리를 하는게 좋다.
