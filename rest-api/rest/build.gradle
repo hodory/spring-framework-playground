@@ -43,6 +43,8 @@ dependencies {
     asciidoctor 'org.springframework.restdocs:spring-restdocs-asciidoctor'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '2.1.8.RELEASE'
     compile group: 'org.springframework.security.oauth.boot', name: 'spring-security-oauth2-autoconfigure', version: '2.2.2.RELEASE'
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-test
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.1.6.RELEASE'
 }
 
 test {
