@@ -150,3 +150,7 @@ Web Security는 Servlet과 연관이 되어있다.(Filter 기반 Security)
 
 스프링 시큐리티는 적용하되, HttpSecurity로 필터링 하기 위해, HttpSecurity를 사용할 수 있다.<br/>
 더 많은 체이닝 처리를 해야해서 서버가 더 많이 일을 해야하므로, static 리소스의 경우 WebSecurity에서 접근 관리를 하는게 좋다.
+
+### 리소스 서버는 어디에 두어야 할까?
+리소스 서버는 이벤트 리소스를 제공하는 서버와 같이 있는게 맞다.<br/>
+인증서버는 따로 분리하는게 맞다.
