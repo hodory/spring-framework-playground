@@ -3,6 +3,7 @@ package dev.hodory.restapi.configs;
 import dev.hodory.restapi.accounts.Account;
 import dev.hodory.restapi.accounts.AccountRole;
 import dev.hodory.restapi.accounts.AccountService;
+import dev.hodory.restapi.common.AppProperties;
 import java.util.Set;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,17 +30,28 @@ public class AppConfig {
   @Bean
   public ApplicationRunner applicationRunner() {
     return new ApplicationRunner() {
+
       @Autowired
       AccountService accountService;
 
+      @Autowired
+      AppProperties appProperties;
+
       @Override
       public void run(ApplicationArguments args) throws Exception {
-        final Account account = Account.builder()
-            .email("me@hodory.dev")
-            .password("password@test")
-            .roles(Set.of(AccountRole.ADMIN))
+        final Account admin = Account.builder()
+            .email(appProperties.getAdminUsername())
+            .password(appProperties.getAdminPassword())
+            .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
             .build();
-        accountService.saveAccount(account);
+        accountService.saveAccount(admin);
+
+        final Account user = Account.builder()
+            .email(appProperties.getUserUsername())
+            .password(appProperties.getUserPassword())
+            .roles(Set.of(AccountRole.USER))
+            .build();
+        accountService.saveAccount(user);
       }
     };
   }

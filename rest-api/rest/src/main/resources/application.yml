@@ -26,3 +26,10 @@ logging:
           descriptor:
             sql:
               BasicBinder: TRACE
+myapp:
+  admin-username: admin@hodory.dev
+  admin-password: admin@password
+  user-username: user@hodory.dev
+  user-password: user@password
+  client-id: myApp
+  client-secret: pass

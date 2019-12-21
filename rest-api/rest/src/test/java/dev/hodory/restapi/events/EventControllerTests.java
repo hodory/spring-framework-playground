@@ -22,6 +22,7 @@ import dev.hodory.restapi.accounts.Account;
 import dev.hodory.restapi.accounts.AccountRepository;
 import dev.hodory.restapi.accounts.AccountRole;
 import dev.hodory.restapi.accounts.AccountService;
+import dev.hodory.restapi.common.AppProperties;
 import dev.hodory.restapi.common.BaseControllerTest;
 import dev.hodory.restapi.common.TestDescription;
 import java.time.LocalDateTime;
@@ -47,6 +48,8 @@ public class EventControllerTests extends BaseControllerTest {
 
   @Autowired
   AccountRepository accountRepository;
+  @Autowired
+  AppProperties appProperties;
 
   @Before
   public void setUp() {
@@ -156,11 +159,8 @@ public class EventControllerTests extends BaseControllerTest {
         .roles(Set.of(AccountRole.ADMIN, AccountRole.USER)).build();
     accountService.saveAccount(account);
 
-    final String clientId = "myApp";
-    final String clientSecret = "pass";
-
     ResultActions perform = this.mockMvc.perform(MockMvcRequestBuilders.post("/oauth/token")
-        .with(httpBasic(clientId, clientSecret))
+        .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret()))
         .param("username", username)
         .param("password", password)
         .param("grant_type", "password"));
