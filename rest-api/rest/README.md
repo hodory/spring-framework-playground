@@ -154,3 +154,8 @@ Web Security는 Servlet과 연관이 되어있다.(Filter 기반 Security)
 ### 리소스 서버는 어디에 두어야 할까?
 리소스 서버는 이벤트 리소스를 제공하는 서버와 같이 있는게 맞다.<br/>
 인증서버는 따로 분리하는게 맞다.
+
+### 현재 사용자 정보를 가져오는 방법
+`AccountAdapter`와 같이 `userdetails.User`를 상속 받는 클래스를 리턴하여 주면<br/>
+컨트롤러로 주입될때 원하는 속성을 추가하여 받을 수 있어, Account의 Entity 정보로 받을 수 있다.
+이때 `expression`을 사용하면 (`spring expression language`를 이용) 객체가 가지고 있는 필드를 바로 받을 수 있다.

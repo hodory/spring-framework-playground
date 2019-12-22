@@ -329,6 +329,27 @@ public class EventControllerTests extends BaseControllerTest {
   }
 
   @Test
+  @TestDescription("30개의 이벤트를 10개씩 두번째 페이지 조회하기")
+  public void queryEventsWithToken() throws Exception {
+    // Given
+    IntStream.range(0, 30).forEach(this::generateEvent);
+
+    // When
+    this.mockMvc.perform(get("/api/events")
+        .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+        .param("page", "1")
+        .param("size", "10")
+        .param("sort", "name,DESC"))
+        .andDo(print())
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("page").exists())
+        .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
+        .andExpect(jsonPath("_links.self").exists())
+        .andExpect(jsonPath("_links.profile").exists())
+        .andExpect(jsonPath("_links.create-event").exists());
+  }
+
+  @Test
   @TestDescription("기존의 이벤트 하나 조회하기")
   public void getEvent() throws Exception {
     // Given
@@ -345,6 +366,26 @@ public class EventControllerTests extends BaseControllerTest {
         .andDo(document("get-an-event"));
 
   }
+
+//  @Test
+//  @TestDescription("기존의 이벤트 하나 조회하기")
+//  public void getEventWithToken() throws Exception {
+//    // Given
+//    final Event event = this.generateEvent(100);
+//
+//    // When & Then
+//    this.mockMvc.perform(
+//        get("/api/events/{id}", event.getId())
+//            .header(HttpHeaders.AUTHORIZATION, getBearerToken()))
+//        .andDo(print())
+//        .andExpect(status().isOk())
+//        .andExpect(jsonPath("id").exists())
+//        .andExpect(jsonPath("name").exists())
+//        .andExpect(jsonPath("_links.self").exists())
+//        .andExpect(jsonPath("_links.profile").exists())
+//        .andDo(document("get-an-event"));
+//
+//  }
 
   @Test
   @TestDescription("없는 이벤트 조회시 404 응답 받기")
