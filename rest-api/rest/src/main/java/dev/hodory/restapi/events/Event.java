@@ -2,7 +2,9 @@ package dev.hodory.restapi.events;
 
 //import dev.hodory.restapi.accounts.Account;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import dev.hodory.restapi.accounts.Account;
+import dev.hodory.restapi.accounts.AccountSerializer;
 import java.time.LocalDateTime;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -46,6 +48,7 @@ public class Event {
   @Default
   private EventStatus eventStatus = EventStatus.DRAFT;
   @ManyToOne
+  @JsonSerialize(using = AccountSerializer.class)
   private Account manager; // 이벤트에서만 manager를 참조할 수 있도록
 
   public void update() {

@@ -159,3 +159,7 @@ Web Security는 Servlet과 연관이 되어있다.(Filter 기반 Security)
 `AccountAdapter`와 같이 `userdetails.User`를 상속 받는 클래스를 리턴하여 주면<br/>
 컨트롤러로 주입될때 원하는 속성을 추가하여 받을 수 있어, Account의 Entity 정보로 받을 수 있다.
 이때 `expression`을 사용하면 (`spring expression language`를 이용) 객체가 가지고 있는 필드를 바로 받을 수 있다.
+
+### 조회 API에서 연관 모델의 필요 없는 항목은 제외하고 내보내려할때
+JsonSerializer를 만들어두고, 사용할때 특정 도메인에서만 사용하지 않게 하려면,<br/>
+JsonComponent로 등록하는 대신 해당 모델의 필드에 `@JsonSerializer` 어노테이션의 using 옵션을 사용해서 설정할 수 있다.

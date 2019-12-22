@@ -135,6 +135,8 @@ public class EventControllerTests extends BaseControllerTest {
                     .description("it tells if this event is offline event or not"),
                 fieldWithPath("eventStatus")
                     .description("event Status"),
+                fieldWithPath("manager").description("manager of new event"),
+                fieldWithPath("manager.id").description("manager of new event"),
                 fieldWithPath("_links.self.href").description("link to self"),
                 fieldWithPath("_links.query-events.href").description("link to query event list"),
                 fieldWithPath("_links.update-event.href")
@@ -146,28 +148,38 @@ public class EventControllerTests extends BaseControllerTest {
   }
 
   private String getBearerToken() throws Exception {
-    return "Bearer " + getAccessToken();
+    return "Bearer " + getAccessToken(true);
   }
 
-  private String getAccessToken() throws Exception {
+  private String getBearerToken(boolean needToMakeAccount) throws Exception {
+    return "Bearer " + getAccessToken(needToMakeAccount);
+  }
+
+  private String getAccessToken(boolean needToMakeAccount) throws Exception {
 
     // Given
-    final String username = "mo02@outlook.kr";
-    final String password = "my@password";
-    final Account account = Account.builder().email(username)
-        .password(password)
-        .roles(Set.of(AccountRole.ADMIN, AccountRole.USER)).build();
-    accountService.saveAccount(account);
+    if (needToMakeAccount) {
+      createAccount();
+    }
 
     ResultActions perform = this.mockMvc.perform(MockMvcRequestBuilders.post("/oauth/token")
         .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret()))
-        .param("username", username)
-        .param("password", password)
+        .param("username", appProperties.getUserUsername())
+        .param("password", appProperties.getUserPassword())
         .param("grant_type", "password"));
 
     var responseBody = perform.andReturn().getResponse().getContentAsString();
     Jackson2JsonParser parser = new Jackson2JsonParser();
     return parser.parseMap(responseBody).get("access_token").toString();
+  }
+
+  private Account createAccount() {
+    final String username = "user@hodory.dev";
+    final String password = "user@password";
+    final Account account = Account.builder().email(username)
+        .password(password)
+        .roles(Set.of(AccountRole.ADMIN, AccountRole.USER)).build();
+    return accountService.saveAccount(account);
   }
 
   @Test
@@ -302,6 +314,8 @@ public class EventControllerTests extends BaseControllerTest {
                         .description("it tells if this event is offline event or not"),
                     fieldWithPath("_embedded.eventList[0].eventStatus")
                         .description("event Status"),
+                    fieldWithPath("_embedded.eventList[0].manager")
+                        .description("manager of event"),
                     fieldWithPath("_embedded.eventList[0]._links.self.href")
                         .description("link to self"),
                     fieldWithPath("_links.first.href").description("link to first event list"),
@@ -353,7 +367,8 @@ public class EventControllerTests extends BaseControllerTest {
   @TestDescription("기존의 이벤트 하나 조회하기")
   public void getEvent() throws Exception {
     // Given
-    final Event event = this.generateEvent(100);
+    final Account account = this.createAccount();
+    final Event event = this.generateEvent(100, account);
 
     // When & Then
     this.mockMvc.perform(get("/api/events/{id}", event.getId()))
@@ -399,7 +414,9 @@ public class EventControllerTests extends BaseControllerTest {
   @TestDescription("정상적으로 이벤트를 수정하는 테스트")
   public void updateEvent() throws Exception {
     // Given
-    final Event event = this.generateEvent(10);
+    final Account account = this.createAccount();
+    final Event event = this.generateEvent(10, account);
+
     final String eventName = "Spring Test Framework";
     final EventDto newEvent = modelMapper.map(event, EventDto.class);
     newEvent.setName(eventName);
@@ -407,7 +424,7 @@ public class EventControllerTests extends BaseControllerTest {
     // When & Then
     this.mockMvc.perform(
         put("/api/events/{id}", event.getId())
-            .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+            .header(HttpHeaders.AUTHORIZATION, getBearerToken(false))
             .contentType(MediaType.APPLICATION_JSON_UTF8)
             .content(objectMapper.writeValueAsString(newEvent))
             .accept(MediaTypes.HAL_JSON)
@@ -478,8 +495,19 @@ public class EventControllerTests extends BaseControllerTest {
         .andExpect(status().isNotFound());
   }
 
+  private Event generateEvent(final int index, final Account account) {
+    final Event event = buildEvent(index);
+    event.setManager(account);
+    return this.eventRepository.save(event);
+  }
+
   private Event generateEvent(int index) {
-    final Event event = Event.builder()
+    final Event event = buildEvent(index);
+    return this.eventRepository.save(event);
+  }
+
+  private Event buildEvent(int index) {
+    return Event.builder()
         .name("event " + index)
         .description("test event")
         .beginEnrollmentDateTime(LocalDateTime.of(2019, 9, 22, 0, 0))
@@ -494,6 +522,5 @@ public class EventControllerTests extends BaseControllerTest {
         .offline(true)
         .eventStatus(EventStatus.DRAFT)
         .build();
-    return this.eventRepository.save(event);
   }
 }
