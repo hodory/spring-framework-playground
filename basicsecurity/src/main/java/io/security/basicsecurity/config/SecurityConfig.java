@@ -5,13 +5,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @Configuration
@@ -25,28 +25,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated();
         // 인가 처리
         http
-                .formLogin()
-//                .loginPage("/loginPage") // 로그인 페이지 설정
-                .defaultSuccessUrl("/") //  로그인 성공시 이동 할 페이지
-                .failureUrl("/login") // 로그인 실패시 이동 할 페이지
-                .usernameParameter("userId") // 아이디를 입력 받을 파라미터명
-                .passwordParameter("passwd") // 비밀번호를 입력 받을 파라미터명
-                .loginProcessingUrl("/login_proc")//form tag의 action URL
-                .successHandler(new AuthenticationSuccessHandler() {
+                .formLogin();
+
+        http
+                .logout()
+                .logoutUrl("/logout") // Logout Url 설정
+                .logoutSuccessUrl("/login") // logout 성공시 리다이렉트
+                .addLogoutHandler(new LogoutHandler() {
                     @Override
-                    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                        System.out.println("authentication : '" + authentication.getName() + "'");
-                        response.sendRedirect("/");
+                    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+                        HttpSession session = request.getSession();
+                        session.invalidate();
                     }
-                })
-                .failureHandler(new AuthenticationFailureHandler() {
+                }) // 로그아웃 요청시 핸들러
+                .logoutSuccessHandler(new LogoutSuccessHandler() {
                     @Override
-                    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-                        System.out.println("execption : '" + exception.getMessage() + "'");
+                    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
                         response.sendRedirect("/login");
                     }
-                })
-                .permitAll()
+                }) // 로그아웃 성공시 핸들러
+                .deleteCookies("remember-me") // 로그아웃시 삭제 할 쿠키
         ;
     }
 }
