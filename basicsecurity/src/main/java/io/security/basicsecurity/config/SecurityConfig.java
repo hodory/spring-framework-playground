@@ -1,10 +1,12 @@
 package io.security.basicsecurity.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
@@ -17,6 +19,9 @@ import java.io.IOException;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private UserDetailsService userDetailsService;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // 인증 처리
@@ -45,6 +50,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     }
                 }) // 로그아웃 성공시 핸들러
                 .deleteCookies("remember-me") // 로그아웃시 삭제 할 쿠키
-        ;
+                .and()
+                .rememberMe()
+                .rememberMeParameter("remeber") // 파라미터명 default "remember-me"
+                .rememberMeCookieName("remember") // 쿠키명
+                .tokenValiditySeconds(3600) // 만료 시간 설정 (default 14 days)
+                .alwaysRemember(true)
+                .userDetailsService(userDetailsService);
     }
 }
