@@ -29,4 +29,14 @@ public class SecurityController {
     public String adminAll() {
         return "Admin All";
     }
+
+    @GetMapping("/denied")
+    public String denied() {
+        return "denied";
+    }
+
+    @GetMapping("/login")
+    public String login() {
+        return "Login Page";
+    }
 }
